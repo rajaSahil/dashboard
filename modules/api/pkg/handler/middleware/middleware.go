@@ -25,7 +25,6 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	transporthttp "github.com/go-kit/kit/transport/http"
-
 	apiv1 "k8c.io/dashboard/v2/pkg/api/v1"
 	"k8c.io/dashboard/v2/pkg/handler/v1/common"
 	"k8c.io/dashboard/v2/pkg/provider"
@@ -180,7 +179,9 @@ func UserSaver(userProvider provider.UserProvider) endpoint.Middleware {
 			if rawAuthenticatesUser == nil {
 				return nil, utilerrors.New(http.StatusInternalServerError, "no user in context found")
 			}
+			fmt.Println("raw authenticated user", rawAuthenticatesUser)
 			authenticatedUser := rawAuthenticatesUser.(apiv1.User)
+			fmt.Println("authenticated user", authenticatedUser)
 
 			user, err := userProvider.UserByEmail(ctx, authenticatedUser.Email)
 			if err != nil {
@@ -212,6 +213,7 @@ func UserSaver(userProvider provider.UserProvider) endpoint.Middleware {
 			updatedUser.Status.LastSeen = metav1.NewTime(now)
 			updatedUser.Spec.Groups = authenticatedUser.Groups
 			updatedUser, err = userProvider.UpdateUser(ctx, updatedUser)
+			fmt.Println("updated user", updatedUser)
 
 			// Ignore conflict error during update of the lastSeen field as it is not super important.
 			// It can be updated next time.
@@ -222,6 +224,7 @@ func UserSaver(userProvider provider.UserProvider) endpoint.Middleware {
 			if err != nil {
 				return nil, common.KubernetesErrorToHTTPError(err)
 			}
+			fmt.Println("updated user", updatedUser)
 
 			return next(context.WithValue(ctx, kubermaticcontext.UserCRContextKey, updatedUser), request)
 		}
@@ -455,6 +458,7 @@ func getClusterProviderByClusterID(ctx context.Context, seeds map[string]*kuberm
 
 func checkBlockedTokens(ctx context.Context, email, token string, userProvider provider.UserProvider) error {
 	user, err := userProvider.UserByEmail(ctx, email)
+	fmt.Println("middleware token verifier user", user)
 	if err != nil {
 		if !errors.Is(err, provider.ErrNotFound) {
 			return common.KubernetesErrorToHTTPError(err)

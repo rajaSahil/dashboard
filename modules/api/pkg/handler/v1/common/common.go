@@ -257,6 +257,7 @@ func GetOwnersForProject(ctx context.Context, userInfo *provider.UserInfo, proje
 
 func GetProject(ctx context.Context, userInfoGetter provider.UserInfoGetter, projectProvider provider.ProjectProvider, privilegedProjectProvider provider.PrivilegedProjectProvider, projectID string, options *provider.ProjectGetOptions) (*kubermaticv1.Project, error) {
 	adminUserInfo, err := userInfoGetter(ctx, "")
+	fmt.Println("Admin user info", adminUserInfo)
 	if err != nil {
 		return nil, err
 	}

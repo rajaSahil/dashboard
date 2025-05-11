@@ -368,6 +368,7 @@ func getAllProjectsForAdmin(ctx context.Context, userInfo *provider.UserInfo, pr
 	}
 	for _, project := range projectList {
 		projectOwners, err := common.GetOwnersForProject(ctx, userInfo, project, memberProvider, userProvider)
+		fmt.Println("test owners", projectOwners)
 		if err != nil {
 			return nil, common.KubernetesErrorToHTTPError(err)
 		}
